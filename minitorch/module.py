@@ -26,16 +26,21 @@ class Module:
 
     def modules(self) -> Sequence[Module]:
         """Return the direct child modules of this module."""
+        # use __dict__ as trick to avoid triggering the __getattr__ method
         m: Dict[str, Module] = self.__dict__["_modules"]
         return list(m.values())
 
     def train(self) -> None:
         """Set the mode of this module and all descendent modules to `train`."""
-        raise NotImplementedError("Need to include this file from past assignment.")
+        self.training = True
+        for module in self.modules():
+            module.train()
 
     def eval(self) -> None:
         """Set the mode of this module and all descendent modules to `eval`."""
-        raise NotImplementedError("Need to include this file from past assignment.")
+        self.training = False
+        for module in self.modules():
+            module.eval()
 
     def named_parameters(self) -> Sequence[Tuple[str, Parameter]]:
         """Collect all the parameters of this module and its descendents.
@@ -45,11 +50,19 @@ class Module:
             The name and `Parameter` of each ancestor parameter.
 
         """
-        raise NotImplementedError("Need to include this file from past assignment.")
+        nps = [(k, v) for k, v in self._parameters.items()]
+        for moduleName, module in self.__dict__["_modules"].items():
+            nps.extend(
+                [(f"{moduleName}.{name}", p) for name, p in module.named_parameters()]
+            )
+        return nps
 
     def parameters(self) -> Sequence[Parameter]:
         """Enumerate over all the parameters of this module and its descendents."""
-        raise NotImplementedError("Need to include this file from past assignment.")
+        ps = list(self._parameters.values())
+        for module in self.modules():
+            ps.extend(module.parameters())
+        return ps
 
     def add_parameter(self, k: str, v: Any) -> Parameter:
         """Manually add a parameter. Useful helper for scalar parameters.
@@ -85,6 +98,7 @@ class Module:
         return None
 
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        """Call the forward method of the module."""
         return self.forward(*args, **kwargs)
 
     def __repr__(self) -> str:

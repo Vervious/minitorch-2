@@ -85,11 +85,48 @@ class Scalar:
     def __bool__(self) -> bool:
         return bool(self.data)
 
+    def __add__(self, b: ScalarLike) -> Scalar:
+        return Add.apply(self, b)
+
     def __radd__(self, b: ScalarLike) -> Scalar:
         return self + b
 
     def __rmul__(self, b: ScalarLike) -> Scalar:
         return self * b
+
+    def __lt__(self, b: ScalarLike) -> Scalar:
+        return LT.apply(self, b)
+
+    def __gt__(self, b: ScalarLike) -> Scalar:
+        return LT.apply(b, self)
+
+    def __neg__(self) -> Scalar:
+        return Neg.apply(self)
+
+    def __sub__(self, b: ScalarLike) -> Scalar:
+        return self + (-b)
+
+    def __rsub__(self, b: ScalarLike) -> Scalar:
+        return b + (-self)
+
+    def __eq__(self, b: ScalarLike) -> Scalar:
+        return EQ.apply(self, b)
+
+    def exp(self) -> Scalar:
+        """Applies the exponential function to the scalar."""
+        return Exp.apply(self)
+
+    def log(self) -> Scalar:
+        """Applies the natural log function to the scalar."""
+        return Log.apply(self)
+
+    def sigmoid(self) -> Scalar:
+        """Applies the sigmoid function to the scalar."""
+        return Sigmoid.apply(self)
+
+    def relu(self) -> Scalar:
+        """Applies the ReLU function to the scalar."""
+        return ReLU.apply(self)
 
     # Variable elements for backprop
 
@@ -112,21 +149,33 @@ class Scalar:
         return self.history is not None and self.history.last_fn is None
 
     def is_constant(self) -> bool:
+        """Checks if this scalar is the output of some computational graph"""
         return self.history is None
 
     @property
     def parents(self) -> Iterable[Variable]:
-        """Get the variables used to create this one."""
+        """Returns the parent scalars of this scalar."""
         assert self.history is not None
         return self.history.inputs
 
     def chain_rule(self, d_output: Any) -> Iterable[Tuple[Variable, Any]]:
+        """Given dL/dSelf, compute dL/dParent for each parent. Returns a list
+        of derivatives, restricted to non-constant parents.
+        """
         h = self.history
         assert h is not None
         assert h.last_fn is not None
         assert h.ctx is not None
 
-        raise NotImplementedError("Need to include this file from past assignment.")
+        # d_output = dL/dself
+        inputX = h.inputs  # sequence of scalars [a, b, c, ...]
+        dLdX = h.last_fn._backward(h.ctx, d_output)  # gives (dL/da, dL/db, dL/dc, ...)
+
+        return [
+            (inputX[i], dLdX[i])
+            for i in range(len(inputX))
+            if not inputX[i].is_constant()
+        ]
 
     def backward(self, d_output: Optional[float] = None) -> None:
         """Calls autodiff to fill in the derivatives for the history of this object.
@@ -141,15 +190,13 @@ class Scalar:
             d_output = 1.0
         backpropagate(self, d_output)
 
-    raise NotImplementedError("Need to include this file from past assignment.")
-
 
 def derivative_check(f: Any, *scalars: Scalar) -> None:
     """Checks that autodiff works on a python function.
     Asserts False if derivative is incorrect.
 
-    Parameters
-    ----------
+    Args:
+    ----
         f : function from n-scalars to 1-scalar.
         *scalars  : n input scalar values.
 

@@ -377,4 +377,5 @@ def test_bmm(backend: str, data: DataObject) -> None:
         .sum(2)
         .view(D, A, C)
     )
+
     assert_close_tensor(c, c2)
