@@ -37,7 +37,9 @@ def tile(input: Tensor, kernel: Tuple[int, int]) -> Tuple[Tensor, int, int]:
     assert width % kw == 0
 
     # NOTE: implemented for task 4.3
-    return input.contiguous().view(batch, channel, height // kh, width // kw, kw * kh), height // kh, width // kw
+    broken = input.contiguous().view(batch, channel, height // kh, kh, width // kw, kw) # thank you copilot
+    fixed = broken.permute(0, 1, 2, 4, 3, 5) # makes non-contiguous
+    return fixed.contiguous().view(batch, channel, height // kh, width // kw, kw * kh), height // kh, width // kw
     
 
 
@@ -60,4 +62,5 @@ def avgpool2d(input: Tensor, kernel_size:Tuple[int, int]) -> Tensor:
     batch, channel, _, _ = input.shape
     tile_input, new_height, new_width = tile(input, kernel_size)
 
-    return tile_input.mean(dim=4).view(batch, channel, new_height, new_width)
+    return tile_input.mean(dim=4).contiguous().view(batch, channel, new_height, new_width)
+
