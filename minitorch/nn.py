@@ -88,3 +88,82 @@ def max(input: Tensor, dim: int | None = None) -> Tensor:
             newDims.append(input.shape[d])
         return input.max(dim=dim).view(*newDims)
     return input.max(dim=dim).view(1)
+
+
+def softmax(input: Tensor, dim: int | None = None) -> Tensor:
+    """Apply a softmax operator.
+
+    Args:
+    ----
+        input: input tensor
+        dim: Optional dimension to reduce on
+
+    Returns:
+    -------
+        Tensor of the same shape as the input tensor.
+
+    """
+    # NOTE: implemented for task 4.4
+    exponentiated = input.exp()
+    total = exponentiated.sum(dim=dim)
+    return exponentiated / total
+
+def logsoftmax(input: Tensor, dim: int | None = None) -> Tensor:
+    """Apply a log softmax operator.
+
+    Args:
+    ----
+        input: input tensor
+        dim: Optional dimension to reduce on
+
+    Returns:
+    -------
+        Tensor of the same shape as the input tensor.
+
+    """
+    # NOTE: implemented for task 4.4
+    exponentiated = input.exp()
+    total = exponentiated.sum(dim=dim)
+    return input - total.log()
+
+
+def maxpool2d(input: Tensor, kernel_size: Tuple[int, int]) -> Tensor:
+    """Apply a 2D max pooling over an input tensor.
+
+    Args:
+    ----
+        input: batch x channel x height x width
+        kernel_size: height x width of pooling
+
+    Returns:
+    -------
+        Tensor of size batch x channel x new_height x new_width
+
+    """
+    # NOTE: implemented for task 4.4
+    batch, channel, _, _ = input.shape
+    tile_input, new_height, new_width = tile(input, kernel_size)
+
+    # note that contiguous just makes a copy, which has backwards defined
+    return tile_input.max(dim=4).contiguous().view(batch, channel, new_height, new_width)
+
+
+def dropout(input: Tensor, p: float, ignore: bool = False) -> Tensor:
+    """Apply a dropout operator.
+
+    Args:
+    ----
+        input: input tensor
+        p: probability of dropping
+        ignore: ignore the dropout (shortcut for disabling)
+
+    Returns:
+    -------
+        Tensor of the same shape as the input tensor.
+
+    """
+    # NOTE: implemented for task 4.4
+    if ignore:
+        return input
+    mask = rand(input.shape) > p
+    return input * mask
