@@ -64,3 +64,27 @@ def avgpool2d(input: Tensor, kernel_size:Tuple[int, int]) -> Tensor:
 
     return tile_input.mean(dim=4).contiguous().view(batch, channel, new_height, new_width)
 
+
+def max(input: Tensor, dim: int | None = None) -> Tensor:
+    """Apply max reduction over all elements of the tensor.
+
+    Args:
+    ----
+        input: tensor to reduce
+        dim: Optional dimension to reduce on
+
+    Returns:
+    -------
+        Tensor of size 1 with the maximum value of the input tensor.
+
+    """
+    # NOTE: implemented for task 4.4
+    
+    if dim is not None:
+        newDims = []
+        for d in range(len(input.shape)):
+            if d == dim:
+                continue
+            newDims.append(input.shape[d])
+        return input.max(dim=dim).view(*newDims)
+    return input.max(dim=dim).view(1)

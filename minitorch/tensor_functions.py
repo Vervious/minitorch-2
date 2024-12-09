@@ -165,6 +165,25 @@ class ReLU(Function):
         return t1.f.relu_back_zip(t1, grad_output)
 
 
+class Max(Function):
+    @staticmethod
+    def forward(ctx: Context, t1: Tensor, dim: Tensor) -> Tensor:
+        """Apply max."""
+        res = t1.f.max_reduce(t1, int(dim.item()))
+        ctx.save_for_backward(t1, res)
+        return res
+
+    @staticmethod
+    def backward(ctx: Context, grad_output: Tensor) ->  Tuple[Tensor, float]:
+        """Backward for max."""
+        (t1,res) = ctx.saved_values
+        # just propagate gradient back to actual max value (or their indices) for now
+        # unclear if this is really meaningful
+        max_indices = t1.f.eq_zip(t1, res)
+        return grad_output.f.mul_zip(grad_output, max_indices), 0.0
+
+
+
 class Log(Function):
     @staticmethod
     def forward(ctx: Context, t1: Tensor) -> Tensor:

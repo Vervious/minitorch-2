@@ -56,7 +56,7 @@ def lt(x: float, y: float) -> float:
     """Checks if x is less than y"""
     return 1.0 if x < y else 0.0
 
-
+    
 def eq(x: float, y: float) -> float:
     """Check equality of x and y"""
     return 1.0 if x == y else 0.0

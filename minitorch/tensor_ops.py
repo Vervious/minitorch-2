@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Callable, Optional, Type
 
 import numpy as np
 from typing_extensions import Protocol
+from math import inf
 
 from . import operators
 from .tensor_data import (
@@ -90,6 +91,8 @@ class TensorBackend:
         # Reduce
         self.add_reduce = ops.reduce(operators.add, 0.0)
         self.mul_reduce = ops.reduce(operators.mul, 1.0)
+        self.max_reduce = ops.reduce(operators.max, -inf)
+
         self.matrix_multiply = ops.matrix_multiply
         self.cuda = ops.cuda
 

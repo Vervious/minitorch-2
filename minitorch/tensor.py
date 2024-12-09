@@ -23,6 +23,7 @@ from .tensor_functions import (
     IsClose,
     Log,
     MatMul,
+    Max,
     Mul,
     Neg,
     Permute,
@@ -363,6 +364,13 @@ class Tensor:
     def log(self) -> Tensor:
         """Apply log element-wise to tensor."""
         return Log.apply(self)
+    
+    def max(self, dim: TensorLike | None = None) -> Tensor:
+        """Apply max reduction over all elements of the tensor. Keep dim always True."""
+        if dim is not None:
+            return Max.apply(self, self._ensure_tensor(dim))
+        else:
+            return Max.apply(self.contiguous().view(self.size), self._ensure_tensor(0))
 
     def sum(self, dim: TensorLike | None = None) -> Tensor:
         """Sum tensor along dimension."""
