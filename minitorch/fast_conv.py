@@ -82,17 +82,56 @@ def _tensor_conv1d(
     batch, in_channels, width = input_shape
     out_channels_, in_channels_, kw = weight_shape
 
+    print(f"in_shape: {batch} {in_channels} {width} out_shape {batch_} {out_channels} {out_width} weight_shape: {out_channels_} {in_channels_} {kw}")
+    # print(f"kw: {kw}")
+    # print(f"{width}:{out_width}")
+
     assert (
         batch == batch_
         and in_channels == in_channels_
         and out_channels == out_channels_
+        # and width == out_width # NOTE: may be different when doing backprop?? Why
     )
     s1 = input_strides
     s2 = weight_strides
 
-    # TODO: Implement for Task 4.1.
-    raise NotImplementedError("Need to implement for Task 4.1")
+    # NOTE: below is implemented by me
+    # weirdly, each output channel is sum of all input channels
+    for i in prange(out_size):
+        # batch dimension
+        b = i // out_strides[0]
+        # out channel dimension
+        o = (i % out_strides[0]) // out_strides[1]
+        # out width dimension
+        t = ((i % out_strides[0]) % out_strides[1]) // out_strides[2]
+        
+        _idx_in_base = b * s1[0]
+        _idx_w_base = o * s2[0]
 
+        val = 0.0
+
+        # note that we also sum over in_channels
+        for _in_channel in range(in_channels):
+            _idx_in_ch = _idx_in_base + _in_channel * s1[1]
+            _idx_w_ch = _idx_w_base + _in_channel * s2[1]
+
+            for k in range(kw):
+                if reverse and t - k < 0:
+                    continue
+                if not reverse and t + k >= width:
+                    continue
+
+                if reverse:
+                    _in_index = _idx_in_ch + (t - k) * s1[2]
+                else:
+                    _in_index = _idx_in_ch + (t + k) * s1[2]
+
+                _w_index = _idx_w_ch + k * s2[2]
+
+                val += input[_in_index] * weight[_w_index]
+        
+        out[i] = val
+    
 
 tensor_conv1d = njit(_tensor_conv1d, parallel=True)
 
