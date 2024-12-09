@@ -122,9 +122,10 @@ def logsoftmax(input: Tensor, dim: int | None = None) -> Tensor:
 
     """
     # NOTE: implemented for task 4.4
-    exponentiated = input.exp()
+    c = input.max(dim=dim)
+    exponentiated = (input - c).exp()
     total = exponentiated.sum(dim=dim)
-    return input - total.log()
+    return input - (c + total.log())
 
 
 def maxpool2d(input: Tensor, kernel_size: Tuple[int, int]) -> Tensor:

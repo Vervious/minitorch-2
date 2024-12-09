@@ -34,8 +34,10 @@ class Conv1d(minitorch.Module):
         self.bias = RParam(1, out_channels, 1)
 
     def forward(self, input):
-        # TODO: Implement for Task 4.5.
-        raise NotImplementedError("Need to implement for Task 4.5")
+        # NOTE: Implemented for Task 4.5.
+        # batch, in_channels, width = input.shape
+        x = minitorch.conv1d(input, self.weights.value)
+        return x + self.bias.value
 
 
 class CNNSentimentKim(minitorch.Module):
