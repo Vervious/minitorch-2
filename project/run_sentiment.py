@@ -3,6 +3,8 @@ import random
 import embeddings
 
 import minitorch
+import numpy as np
+
 from datasets import load_dataset
 
 BACKEND = minitorch.TensorBackend(minitorch.FastOps)
@@ -92,20 +94,24 @@ class CNNSentimentKim(minitorch.Module):
         to_concat = []
         for conv_layer in self.conv_layers:
             z = conv_layer.forward(x).relu() # (B, n_features, T)
-            z = z.max(dim=2) # (B, n_features)
-            to_concat.append(z)
+            z = minitorch.max(z, dim=2) # (B, n_features)
 
-        # diy concat since we never wrote one in minitorch
-        x = x.zeros((B, n_features*len(to_concat)))
-        for i in range(len(to_concat)):
-            x[:, i*n_features:(i+1)*n_features] = to_concat[i]
-        # (B, n_features * n_filters (3))
+            # Hacky concatenation code since we never had to implement
+            z = z.permute(1, 0).contiguous() # (n_features, B)
+            _storage = z._tensor._storage # B*n_features (but wraps every B)
+            to_concat.append(_storage)
+
+        # continuation of diy concat
+        _concat = np.concatenate(to_concat) #  B*n_features*3
+        x = minitorch.Tensor.make(_concat, (n_features*len(to_concat), B), backend=embeddings.backend)
+        x = x.permute(1,0).contiguous() # (B, n_features * n_filters (3) )
+
 
         # NOTE: moved dropout up because really it makes a lot more sense...
         x = minitorch.dropout(x, self.dropout, ignore=(self.training == False)) #  (B, n_features * n_filters (3))
 
-        x = self.proj.forward(x).sigmoid()  # (B, C) logits
-        return y
+        y = self.proj.forward(x).sigmoid()  # (B, C) logits
+        return y.view(B)
 
 
 
@@ -191,7 +197,7 @@ class SentenceSentimentTrain:
                 x.requires_grad_(True)
                 y.requires_grad_(True)
                 # Forward
-                print(y)
+                # print(y) # (B)
                 out = model.forward(x)
 
                 prob = (out * y) + (out - 1.0) * (y - 1.0)

@@ -82,9 +82,9 @@ def _tensor_conv1d(
     batch, in_channels, width = input_shape
     out_channels_, in_channels_, kw = weight_shape
 
-    print(
-        f"in_shape: {batch} {in_channels} {width} out_shape {batch_} {out_channels} {out_width} weight_shape: {out_channels_} {in_channels_} {kw}"
-    )
+    # print(
+    #     f"in_shape: {batch} {in_channels} {width} out_shape {batch_} {out_channels} {out_width} weight_shape: {out_channels_} {in_channels_} {kw}"
+    # )
     # print(f"kw: {kw}")
     # print(f"{width}:{out_width}")
 
