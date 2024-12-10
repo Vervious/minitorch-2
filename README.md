@@ -61,6 +61,11 @@ for running in bg
 ```screen -dm bash -c 'python -u project/run_mnist_multiclass.py > log-screen.txt 2>&1'
 ```
 
+```
+screen -dm bash -c 'python -u project/run_sentiment.py > log-screen.txt 2>&1'
+```
+
+
 # Submissions
 
 See `mnist.txt` and `sentiment.txt` in the root directory of the repository.
