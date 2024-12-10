@@ -1,0 +1,11 @@
+Epoch 1 loss 2.3049736513782064 valid acc 1/16
+Epoch 1 loss 11.552288590432566 valid acc 0/16
+Epoch 1 loss 11.534710567663216 valid acc 0/16
+Epoch 1 loss 11.54472042362969 valid acc 0/16
+Epoch 1 loss 11.508395631362255 valid acc 1/16
+Epoch 1 loss 11.526440937684109 valid acc 0/16
+Epoch 1 loss 11.547061176607844 valid acc 0/16
+Epoch 1 loss 11.532821965937398 valid acc 0/16
+Epoch 1 loss 11.512630031892217 valid acc 0/16
+Epoch 1 loss 11.5133066743995 valid acc 0/16
+Epoch 1 loss 11.503822275273457 valid acc 0/16

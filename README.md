@@ -56,3 +56,7 @@ for pre-submission
 to install minitorch
 ```pip install -e .
 ```
+
+for running in bg
+```screen -dm bash -c 'python -u project/run_mnist_multiclass.py > log-screen.txt 2>&1'
+```
