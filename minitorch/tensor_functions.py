@@ -174,14 +174,13 @@ class Max(Function):
         return res
 
     @staticmethod
-    def backward(ctx: Context, grad_output: Tensor) ->  Tuple[Tensor, float]:
+    def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, float]:
         """Backward for max."""
-        (t1,res) = ctx.saved_values
+        (t1, res) = ctx.saved_values
         # just propagate gradient back to actual max value (or their indices) for now
         # unclear if this is really meaningful
         max_indices = t1.f.eq_zip(t1, res)
         return grad_output.f.mul_zip(grad_output, max_indices), 0.0
-
 
 
 class Log(Function):

@@ -1,10 +1,7 @@
 from typing import Tuple
 
-from . import operators
-from .autodiff import Context
-from .fast_ops import FastOps
 from .tensor import Tensor
-from .tensor_functions import Function, rand, tensor
+from .tensor_functions import rand
 
 
 # List of functions in this file:
@@ -37,15 +34,19 @@ def tile(input: Tensor, kernel: Tuple[int, int]) -> Tuple[Tensor, int, int]:
     assert width % kw == 0
 
     # NOTE: implemented for task 4.3
-    broken = input.contiguous().view(batch, channel, height // kh, kh, width // kw, kw) # thank you copilot
-    fixed = broken.permute(0, 1, 2, 4, 3, 5) # makes non-contiguous
-    return fixed.contiguous().view(batch, channel, height // kh, width // kw, kw * kh), height // kh, width // kw
-    
-
+    broken = input.contiguous().view(
+        batch, channel, height // kh, kh, width // kw, kw
+    )  # thank you copilot
+    fixed = broken.permute(0, 1, 2, 4, 3, 5)  # makes non-contiguous
+    return (
+        fixed.contiguous().view(batch, channel, height // kh, width // kw, kw * kh),
+        height // kh,
+        width // kw,
+    )
 
 
 # NOTE: Implement for Task 4.3.
-def avgpool2d(input: Tensor, kernel_size:Tuple[int, int]) -> Tensor:
+def avgpool2d(input: Tensor, kernel_size: Tuple[int, int]) -> Tensor:
     """Apply a 2D average pooling over an input tensor.
 
     Args:
@@ -62,7 +63,9 @@ def avgpool2d(input: Tensor, kernel_size:Tuple[int, int]) -> Tensor:
     batch, channel, _, _ = input.shape
     tile_input, new_height, new_width = tile(input, kernel_size)
 
-    return tile_input.mean(dim=4).contiguous().view(batch, channel, new_height, new_width)
+    return (
+        tile_input.mean(dim=4).contiguous().view(batch, channel, new_height, new_width)
+    )
 
 
 def max(input: Tensor, dim: int | None = None) -> Tensor:
@@ -79,7 +82,7 @@ def max(input: Tensor, dim: int | None = None) -> Tensor:
 
     """
     # NOTE: implemented for task 4.4
-    
+
     if dim is not None:
         newDims = []
         for d in range(len(input.shape)):
@@ -107,6 +110,7 @@ def softmax(input: Tensor, dim: int | None = None) -> Tensor:
     exponentiated = input.exp()
     total = exponentiated.sum(dim=dim)
     return exponentiated / total
+
 
 def logsoftmax(input: Tensor, dim: int | None = None) -> Tensor:
     """Apply a log softmax operator.
@@ -146,7 +150,9 @@ def maxpool2d(input: Tensor, kernel_size: Tuple[int, int]) -> Tensor:
     tile_input, new_height, new_width = tile(input, kernel_size)
 
     # note that contiguous just makes a copy, which has backwards defined
-    return tile_input.max(dim=4).contiguous().view(batch, channel, new_height, new_width)
+    return (
+        tile_input.max(dim=4).contiguous().view(batch, channel, new_height, new_width)
+    )
 
 
 def dropout(input: Tensor, p: float, ignore: bool = False) -> Tensor:

@@ -76,7 +76,7 @@ class CNNSentimentKim(minitorch.Module):
             self.conv_layers.append(
                 Conv1d(in_channels=embedding_size, out_channels=feature_map_size, kernel_width=fs)
             )
-        # logistic regression 
+        # logistic regression
         self.proj = Linear(feature_map_size * len(filter_sizes), self.C)
 
 
@@ -107,7 +107,7 @@ class CNNSentimentKim(minitorch.Module):
         x = self.proj.forward(x).sigmoid()  # (B, C) logits
         return y
 
-        
+
 
 
 # Evaluation helper methods
@@ -193,7 +193,7 @@ class SentenceSentimentTrain:
                 # Forward
                 print(y)
                 out = model.forward(x)
-                
+
                 prob = (out * y) + (out - 1.0) * (y - 1.0)
                 loss = -(prob.log() / y.shape[0]).sum()
                 loss.view(1).backward()

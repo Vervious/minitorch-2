@@ -1,6 +1,5 @@
 from typing import Tuple, TypeVar, Any
 
-import numpy as np
 from numba import prange
 from numba import njit as _njit
 
@@ -83,7 +82,9 @@ def _tensor_conv1d(
     batch, in_channels, width = input_shape
     out_channels_, in_channels_, kw = weight_shape
 
-    print(f"in_shape: {batch} {in_channels} {width} out_shape {batch_} {out_channels} {out_width} weight_shape: {out_channels_} {in_channels_} {kw}")
+    print(
+        f"in_shape: {batch} {in_channels} {width} out_shape {batch_} {out_channels} {out_width} weight_shape: {out_channels_} {in_channels_} {kw}"
+    )
     # print(f"kw: {kw}")
     # print(f"{width}:{out_width}")
 
@@ -105,7 +106,7 @@ def _tensor_conv1d(
         o = (i % out_strides[0]) // out_strides[1]
         # out width dimension
         t = ((i % out_strides[0]) % out_strides[1]) // out_strides[2]
-        
+
         _idx_in_base = b * s1[0]
         _idx_w_base = o * s2[0]
 
@@ -130,9 +131,9 @@ def _tensor_conv1d(
                 _w_index = _idx_w_ch + k * s2[2]
 
                 val += input[_in_index] * weight[_w_index]
-        
+
         out[i] = val
-    
+
 
 tensor_conv1d = njit(_tensor_conv1d, parallel=True)
 
@@ -262,7 +263,6 @@ def _tensor_conv2d(
 
     # NOTE: below is implemented by me
     for i in prange(out_size):
-
         # batch, out_channels, height, width = out_shape
 
         # batch dimension
@@ -281,7 +281,6 @@ def _tensor_conv2d(
 
         # note that we also sum over in_channels
         for _in_channel in prange(in_channels):
-
             for j in prange(kh):
                 if reverse:
                     in_j = h - j
@@ -289,7 +288,7 @@ def _tensor_conv2d(
                     in_j = h + j
                 if in_j < 0 or in_j >= height:
                     continue
-                
+
                 for k in prange(kw):
                     if reverse:
                         in_k = t - k
@@ -303,7 +302,7 @@ def _tensor_conv2d(
                     _w_index = o * s20 + _in_channel * s21 + j * s22 + k * s23
 
                     val += input[_in_index] * weight[_w_index]
-        
+
         out[i] = val
 
 

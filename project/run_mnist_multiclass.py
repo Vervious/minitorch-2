@@ -83,7 +83,7 @@ class Network(minitorch.Module):
     def forward(self, x):
         # NOTE: Implemented for Task 4.5.
         B, n_embd, H, W = x.shape
-        # H, W = 28, 28 
+        # H, W = 28, 28
         # presumably only one input channel n_embd = 1
 
         assert H == W == 28

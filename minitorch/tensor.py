@@ -364,7 +364,7 @@ class Tensor:
     def log(self) -> Tensor:
         """Apply log element-wise to tensor."""
         return Log.apply(self)
-    
+
     def max(self, dim: TensorLike | None = None) -> Tensor:
         """Apply max reduction over all elements of the tensor. Keep dim always True."""
         if dim is not None:

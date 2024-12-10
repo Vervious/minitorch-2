@@ -31,7 +31,6 @@ def test_avg(t: Tensor) -> None:
 @pytest.mark.task4_4
 @given(tensors(shape=(2, 3, 4)))
 def test_max(t: Tensor) -> None:
-
     # NOTE implemented for 4.4
     # check forward pass. Note currently max value is configured to be 100, so
     t[0, 0, 0] = 108
@@ -55,9 +54,9 @@ def test_max(t: Tensor) -> None:
     out.backward()
 
     assert t.grad is not None
-    assert_close(t.grad[1,2,0], 1)
-    assert_close(t.grad[0,0,0], 0)
-    assert_close(t.grad[0,0,2], 0)
+    assert_close(t.grad[1, 2, 0], 1)
+    assert_close(t.grad[0, 0, 0], 0)
+    assert_close(t.grad[0, 0, 2], 0)
 
 
 @pytest.mark.task4_4
