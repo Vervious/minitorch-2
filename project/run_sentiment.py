@@ -69,7 +69,6 @@ class CNNSentimentKim(minitorch.Module):
         # NOTE: implemented below for Task 4.5
 
         self.dropout = dropout
-        self.hidden = 2 # NOTE: I'm copying the original paper/ implementation; otherwise the dropout doesn't make sense at all...
 
         # Convolutional layers
         self.conv_layers = []
@@ -77,10 +76,8 @@ class CNNSentimentKim(minitorch.Module):
             self.conv_layers.append(
                 Conv1d(in_channels=embedding_size, out_channels=feature_map_size, kernel_width=fs)
             )
-        # project into hidden space
-        self.proj = Linear(feature_map_size * len(filter_sizes), self.hidden)
-        # Classifier
-        self.cls = Linear(self.hidden, self.C)
+        # logistic regression 
+        self.proj = Linear(feature_map_size * len(filter_sizes), self.C)
 
 
     def forward(self, embeddings):
@@ -107,8 +104,7 @@ class CNNSentimentKim(minitorch.Module):
         # NOTE: moved dropout up because really it makes a lot more sense...
         x = minitorch.dropout(x, self.dropout, ignore=(self.training == False)) #  (B, n_features * n_filters (3))
 
-        x = self.proj.forward(x).relu()  # (B, C) logits
-        y = self.cls.forward(x).sigmoid() # (B, C)
+        x = self.proj.forward(x).sigmoid()  # (B, C) logits
         return y
 
         
