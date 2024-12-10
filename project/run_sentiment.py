@@ -63,15 +63,55 @@ class CNNSentimentKim(minitorch.Module):
     ):
         super().__init__()
         self.feature_map_size = feature_map_size
-        # TODO: Implement for Task 4.5.
-        raise NotImplementedError("Need to implement for Task 4.5")
+        self.C = 1 # binary classifier + sigmoid
+        # NOTE: could also set self.C = 2, and use softmax, as in the original paper...
+
+        # NOTE: implemented below for Task 4.5
+
+        self.dropout = dropout
+        self.hidden = 2 # NOTE: I'm copying the original paper/ implementation; otherwise the dropout doesn't make sense at all...
+
+        # Convolutional layers
+        self.conv_layers = []
+        for fs in filter_sizes:
+            self.conv_layers.append(
+                Conv1d(in_channels=embedding_size, out_channels=feature_map_size, kernel_width=fs)
+            )
+        # project into hidden space
+        self.proj = Linear(feature_map_size * len(filter_sizes), self.hidden)
+        # Classifier
+        self.cls = Linear(self.hidden, self.C)
+
 
     def forward(self, embeddings):
         """
-        embeddings tensor: [batch x sentence length x embedding dim]
+        embeddings tensor: [batch x sentence length x embedding dim (n_embd)]
         """
-        # TODO: Implement for Task 4.5.
-        raise NotImplementedError("Need to implement for Task 4.5")
+        # NOTE: Implemented for Task 4.5
+        B, n_features, n_embd = embeddings.shape[0], self.feature_map_size, embeddings.shape[2]
+
+        # n_embd maps to in_channels
+        x = embeddings.permute(0, 2, 1) # (B, n_embd, T)
+        to_concat = []
+        for conv_layer in self.conv_layers:
+            z = conv_layer.forward(x).relu() # (B, n_features, T)
+            z = z.max(dim=2) # (B, n_features)
+            to_concat.append(z)
+
+        # diy concat since we never wrote one in minitorch
+        x = x.zeros((B, n_features*len(to_concat)))
+        for i in range(len(to_concat)):
+            x[:, i*n_features:(i+1)*n_features] = to_concat[i]
+        # (B, n_features * n_filters (3))
+
+        # NOTE: moved dropout up because really it makes a lot more sense...
+        x = minitorch.dropout(x, self.dropout, ignore=(self.training == False)) #  (B, n_features * n_filters (3))
+
+        x = self.proj.forward(x).relu()  # (B, C) logits
+        y = self.cls.forward(x).sigmoid() # (B, C)
+        return y
+
+        
 
 
 # Evaluation helper methods
@@ -155,7 +195,9 @@ class SentenceSentimentTrain:
                 x.requires_grad_(True)
                 y.requires_grad_(True)
                 # Forward
+                print(y)
                 out = model.forward(x)
+                
                 prob = (out * y) + (out - 1.0) * (y - 1.0)
                 loss = -(prob.log() / y.shape[0]).sum()
                 loss.view(1).backward()
@@ -260,12 +302,20 @@ if __name__ == "__main__":
     learning_rate = 0.01
     max_epochs = 250
 
+    print("Loading data...")
+    gluedataset = load_dataset("glue", "sst2")
+    print("Now getting wikipedia gigaword...")
+    emb = embeddings.GloveEmbedding("wikipedia_gigaword", d_emb=50, show_progress=True)
+    print("Done loading data")
+
+    print("Encoding data...")
     (X_train, y_train), (X_val, y_val) = encode_sentiment_data(
-        load_dataset("glue", "sst2"),
-        embeddings.GloveEmbedding("wikipedia_gigaword", d_emb=50, show_progress=True),
+        gluedataset,
+        emb,
         train_size,
         validation_size,
     )
+    print("Done encoding data")
     model_trainer = SentenceSentimentTrain(
         CNNSentimentKim(feature_map_size=100, filter_sizes=[3, 4, 5], dropout=0.25)
     )

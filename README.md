@@ -52,3 +52,7 @@ streamlit run project/app.py -- 1
 for pre-submission
 ```pre-commit run --all
 ```
+
+to install minitorch
+```pip install -e .
+```

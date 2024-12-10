@@ -41,8 +41,8 @@ class Conv2d(minitorch.Module):
         self.bias = RParam(out_channels, 1, 1)
 
     def forward(self, input):
-        # TODO: Implement for Task 4.5.
-        raise NotImplementedError("Need to implement for Task 4.5")
+        # NOTE: Implemented for Task 4.5.
+        return minitorch.conv2d(input, self.weights.value) + self.bias.value
 
 
 class Network(minitorch.Module):
@@ -66,13 +66,38 @@ class Network(minitorch.Module):
         # For vis
         self.mid = None
         self.out = None
+        self.C = C
 
-        # TODO: Implement for Task 4.5.
-        raise NotImplementedError("Need to implement for Task 4.5")
+        NUM_IN_CHANNEL = 1 # TODO: why? sketchy
+
+        # NOTE: Implemented for Task 4.5.
+        # in_channels, out_channels, kh, kw
+        self.conv_1 = Conv2d(NUM_IN_CHANNEL, 4, 3, 3)
+        self.conv_2 = Conv2d(4, 8, 3, 3)
+
+        self.ln_1 = Linear(392, 64)
+        self.ln_2 = Linear(64, self.C)
+
+
 
     def forward(self, x):
-        # TODO: Implement for Task 4.5.
-        raise NotImplementedError("Need to implement for Task 4.5")
+        # NOTE: Implemented for Task 4.5.
+        B, n_embd, H, W = x.shape
+        # H, W = 28, 28 
+        # presumably only one input channel n_embd = 1
+
+        assert H == W == 28
+
+        self.mid = self.conv_1.forward(x).relu() # (B, 4, H, W)
+        self.out = self.conv_2.forward(self.mid).relu() # (B, 8, H, W)
+
+        x = minitorch.avgpool2d(self.out, (4, 4)) # (B, 8, H // 4, W // 4)
+        x = x.view(B, 392) # (B, 392)
+        x = self.ln_1.forward(x).relu() # (B, 64)
+        x = minitorch.dropout(x, 0.25, ignore=(self.training == False)) # (B, 64)
+        x = self.ln_2.forward(x) # (B, C) logits
+        y = minitorch.logsoftmax(x, dim=1) # (B, C)
+        return y
 
 
 def make_mnist(start, stop):

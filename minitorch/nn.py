@@ -44,7 +44,7 @@ def tile(input: Tensor, kernel: Tuple[int, int]) -> Tuple[Tensor, int, int]:
 
 
 
-# TODO: Implement for Task 4.3.
+# NOTE: Implement for Task 4.3.
 def avgpool2d(input: Tensor, kernel_size:Tuple[int, int]) -> Tensor:
     """Apply a 2D average pooling over an input tensor.
 
