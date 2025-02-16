@@ -1,6 +1,6 @@
 # minitorch
 
-This was done following https://minitorch.github.io/. Much was imported from prior repositories where I previously did earlier implementation tasks.
+This was done following https://minitorch.github.io/. Much of the code is imported from prior repositories where I previously did earlier implementation tasks. 
 
 ## Notes to self
 
