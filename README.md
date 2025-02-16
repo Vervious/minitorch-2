@@ -1,8 +1,8 @@
 # minitorch
 
-This was done following https://minitorch.github.io/. 
+This was done following https://minitorch.github.io/. Much was imported from prior repositories where I previously did earlier implementation tasks.
 
-# Notes to self
+## Notes to self
 
 for virtualenv:
 
@@ -32,6 +32,6 @@ screen -dm bash -c 'python -u project/run_sentiment.py > log-screen.txt 2>&1'
 ```
 
 
-# Evaluations
+## Evaluations
 
 See `mnist.txt` and `sentiment.txt` in the root directory of the repository.
